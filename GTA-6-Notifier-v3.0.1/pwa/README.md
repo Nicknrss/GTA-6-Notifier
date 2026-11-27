@@ -1,21 +1,20 @@
-# GTA 6 Notifier — PWA companion
+# GTA 6 Notifier — PWA
 
-The PWA now reads the central JSON files published by this repository:
+O PWA é o painel móvel do GTA 6 Notifier. Ele consulta diretamente os quatro arquivos JSON públicos publicados no repositório GitHub:
 
 - `data/history.json`
 - `data/github-releases.json`
 - `data/portwatch-progress.json`
 - `data/portwatch-leaderboard.json`
 
-It synchronizes immediately when opened and polls every 60 seconds while the page remains open. Device-local browser notifications can be enabled from the PWA.
+O painel apresenta visão geral, histórico central, os oito repositórios monitorados, releases registrados e ranking individual do PortWatch VI. A sincronização ocorre ao abrir o aplicativo e a cada 60 segundos enquanto ele permanece aberto.
 
-## Important limitations
+## Conexão e notificações
 
-- GitHub Pages/static JSON is not a push server. Notifications are checked while the PWA page is open; delivery while the PWA is closed is **not** guaranteed.
-- True Web Push while closed still requires a separately hosted HTTPS push endpoint and VAPID keys.
-- GitHub Actions updates the central JSON files on a five-minute schedule, subject to GitHub Actions scheduling delays.
-- The PWA reads the public repository data. Do not put secrets, webhook URLs, tokens, or private information in `data/`.
+Não existe configuração de Cloud Connection, API Endpoint ou chave VAPID neste PWA. A leitura dos dados é feita diretamente pelos arquivos JSON públicos do GitHub.
 
-## Hosting
+As notificações locais do navegador podem funcionar enquanto o PWA está aberto. Notificações push com o PWA fechado não fazem parte desta implementação; isso exigiria um serviço Web Push separado e chaves VAPID.
 
-Enable GitHub Pages for the repository and publish the `main` branch root (or configure the existing Pages setup to publish `pwa/`). Open the PWA's published URL over HTTPS to install it.
+## Publicação
+
+Com o GitHub Pages publicando a branch `main` a partir de `/(root)`, abra `/GTA-6-Notifier/pwa/` no navegador do celular. O projeto não deve conter tokens, webhooks ou outros segredos nos arquivos públicos.
