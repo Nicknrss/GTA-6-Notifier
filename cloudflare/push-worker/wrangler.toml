@@ -4,7 +4,7 @@ compatibility_date = "2026-11-27"
 
 [[kv_namespaces]]
 binding = "SUBSCRIPTIONS"
-id = "COLE_AQUI_O_ID_DO_KV_NAMESPACE"
+id = "795956f8dc864b95800553f5cf8742a0"
 
 [vars]
 APP_ORIGIN = "https://SEU-USUARIO.github.io"
