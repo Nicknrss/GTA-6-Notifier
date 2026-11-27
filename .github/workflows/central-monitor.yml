@@ -41,3 +41,18 @@ jobs:
             git commit -m "chore(data): update central monitoring history [skip ci]"
             git push
           fi
+
+      - name: Dispatch mobile Push notifications (optional)
+        env:
+          PUSH_WORKER_URL: ${{ vars.PUSH_WORKER_URL }}
+          PUSH_DISPATCH_SECRET: ${{ secrets.PUSH_DISPATCH_SECRET }}
+        run: |
+          if [ -z "$PUSH_WORKER_URL" ] || [ -z "$PUSH_DISPATCH_SECRET" ]; then
+            echo "Cloudflare Push is not configured yet; skipping dispatch."
+            exit 0
+          fi
+          curl --fail-with-body --silent --show-error \
+            -X POST "$PUSH_WORKER_URL/dispatch" \
+            -H "Authorization: Bearer $PUSH_DISPATCH_SECRET" \
+            -H "Content-Type: application/json" \
+            --data '{}'
