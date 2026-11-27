@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastUpdated": null,
+  "lastUpdated": "2026-11-27T08:11:39Z",
   "currentProgress": 91.3,
   "highestRecorded": 91.3,
   "history": [
@@ -47,7 +47,7 @@
       "sequence": 6
     }
   ],
-  "latestCheckpoint": "BelloBug",
+  "latestCheckpoint": "Belobug",
   "calculation": "Última pontuação registrada no ranking PortWatch; não é média.",
   "chartHistory": [
     {
@@ -93,5 +93,5 @@
       "sequence": 6
     }
   ],
-  "chartHistoryDescription": "Marcos históricos fornecidos pelo usuário; não misturar com média nem com medições dinâmicas do ranking."
+  "chartHistoryDescription": "Marcos históricos fornecidos pelo usuário; separados das medições dinâmicas."
 }
