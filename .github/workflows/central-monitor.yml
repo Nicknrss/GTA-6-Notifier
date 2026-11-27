@@ -1,9 +1,17 @@
 name: GTA 6 Notifier — Central Monitor
 
 on:
+  # Backup schedule. Cloudflare Cron independently dispatches this workflow
+  # every five minutes to avoid relying on GitHub's best-effort schedule queue.
   schedule:
-    - cron: "2-59/5 * * * *"
+    - cron: "7,22,37,52 * * * *"
   workflow_dispatch:
+    inputs:
+      source:
+        description: "Origem do disparo"
+        required: false
+        type: string
+        default: "manual"
 
 permissions:
   contents: write
@@ -15,7 +23,7 @@ concurrency:
 jobs:
   monitor:
     runs-on: ubuntu-latest
-    timeout-minutes: 4
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
