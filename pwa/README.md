@@ -1,45 +1,53 @@
-# GTA 6 Notifier — painel mobile completo
+# GTA Notifier PWA 1.0.0
 
-A PWA usa os mesmos dados centrais do painel da extensão, publicados em `data/` no repositório GitHub:
+**English | Português**
 
-- `history.json` — histórico central de eventos;
-- `github-releases.json` — releases e os oito repositórios monitorados;
-- `portwatch-progress.json` — progresso e checkpoints;
-- `portwatch-leaderboard.json` — ranking atual e histórico do ranking.
+The PWA reads the same central datasets published in the repository's `data/` directory:
 
-O painel mobile inclui visão geral, histórico pesquisável, oito repositórios, ranking, gráfico de progresso, preferências locais, Discord individual e diagnóstico. Ele sincroniza ao abrir e a cada 60 segundos enquanto estiver aberto.
+A PWA lê os mesmos conjuntos de dados centrais publicados na pasta `data/` do repositório:
 
-## Web Push com a PWA fechada
+- `history.json` — central event history / histórico central de eventos.
+- `github-releases.json` — releases and monitored repositories / releases e repositórios monitorados.
+- `portwatch-progress.json` — progress measurements and checkpoints / medições de progresso e checkpoints.
+- `portwatch-leaderboard.json` — current ranking and ranking history / ranking atual e histórico do ranking.
 
-A entrega em segundo plano usa um Cloudflare Worker separado. O Service Worker da PWA já recebe eventos `push` e mostra a notificação; para ativar a entrega real, é necessário publicar `cloudflare/push-worker`, configurar as chaves VAPID e apontar `PUSH_API_BASE` em `app.js` para a URL publicada do Worker.
+The mobile dashboard includes overview, searchable history, repository monitoring, ranking, progress chart, local preferences, individual Discord settings, and diagnostics. It refreshes on launch and every 60 seconds while open.
 
-### Configurar Cloudflare
+O painel mobile inclui visão geral, histórico pesquisável, monitoramento dos repositórios, ranking, gráfico de progresso, preferências locais, configurações individuais do Discord e diagnóstico. Atualiza ao abrir e a cada 60 segundos enquanto estiver aberto.
 
-1. Instale Node.js LTS e npm no computador.
-2. No terminal, entre em `cloudflare/push-worker` e execute `npm install`.
-3. Gere um par VAPID uma única vez: `node scripts/generate-vapid.mjs`. Guarde a chave pública e a privada em local seguro. Não publique a chave privada.
-4. Crie um KV namespace chamado `gta6-notifier-subscriptions` no Cloudflare e copie o ID para `wrangler.toml` no lugar de `COLE_AQUI_O_ID_DO_KV_NAMESPACE`.
-5. Ajuste `APP_ORIGIN` para a origem HTTPS exata do GitHub Pages (somente origem, sem `/pwa`). Ajuste `VAPID_SUBJECT` para um e-mail de contato válido e `PWA_URL` para a URL completa da PWA publicada (incluindo `/pwa/`).
-6. Configure os secrets do Worker:
-   - `npx wrangler secret put VAPID_PUBLIC_KEY`
-   - `npx wrangler secret put VAPID_PRIVATE_KEY`
-   - `npx wrangler secret put DISPATCH_SECRET` (use uma senha aleatória longa).
-7. Publique: `npx wrangler deploy`.
-8. Copie a URL `https://...workers.dev` gerada e coloque-a em `PUSH_API_BASE` no início de `pwa/app.js`.
-9. No GitHub, em Settings → Secrets and variables → Actions, crie:
-   - Variable `PUSH_WORKER_URL`: URL do Worker sem barra final;
-   - Secret `PUSH_DISPATCH_SECRET`: exatamente o mesmo valor configurado no Worker.
-10. Publique os arquivos atualizados do projeto. No celular, abra a PWA, vá a Configurações e toque em **Ativar notificações neste celular**.
+## Web Push while the PWA is closed | Web Push com a PWA fechada
 
-A primeira chamada `/dispatch` cria uma linha de base silenciosa para não disparar notificações antigas. As próximas execuções enviam apenas eventos novos, sem repetir IDs já processados. O workflow chama o Worker somente quando a variável e o secret do GitHub estiverem configurados.
+Background delivery uses the separate Cloudflare Worker in `cloudflare/push-worker`. The PWA service worker handles incoming `push` events, but real delivery requires deploying the Worker and configuring VAPID.
 
-## Teste
+A entrega em segundo plano usa o Cloudflare Worker separado em `cloudflare/push-worker`. O service worker da PWA processa eventos `push`, mas a entrega real exige publicar o Worker e configurar VAPID.
 
-Depois de configurar tudo, o endpoint `/health` do Worker deve retornar `ok: true`. Ative Push na PWA e use **Enviar notificação de teste**. Faça o teste com o app em primeiro plano, depois fechado e por fim com a tela bloqueada. O aparelho precisa estar conectado à internet, ter permissão de notificações e não pode restringir excessivamente a atividade em segundo plano.
+### Cloudflare setup | Configuração da Cloudflare
 
-## Observações
+1. Install Node.js LTS and npm. / Instale Node.js LTS e npm.
+2. In `cloudflare/push-worker`, run `npm install`. / Em `cloudflare/push-worker`, execute `npm install`.
+3. Generate a VAPID pair using the generator provided by your deployment setup. Keep the private key secret. / Gere um par VAPID usando o gerador fornecido pela sua configuração de publicação. Mantenha a chave privada em segredo.
+4. Create the KV namespace `gta6-notifier-subscriptions` and place its ID in `wrangler.toml`. / Crie o namespace KV `gta6-notifier-subscriptions` e coloque seu ID em `wrangler.toml`.
+5. Set `APP_ORIGIN` to the exact HTTPS GitHub Pages origin, `VAPID_SUBJECT` to a valid contact address, and `PWA_URL` to the full published PWA URL. / Defina `APP_ORIGIN` com a origem HTTPS exata do GitHub Pages, `VAPID_SUBJECT` com um contato válido e `PWA_URL` com a URL completa da PWA publicada.
+6. Configure the Worker secrets required by `cloudflare/push-worker/src/index.js`, including the VAPID private key and dispatch secret. Never put secret values in source files. / Configure os secrets exigidos por `cloudflare/push-worker/src/index.js`, incluindo a chave privada VAPID e o segredo de despacho. Nunca coloque valores secretos em arquivos-fonte.
+7. Deploy with `npx wrangler deploy`. / Publique com `npx wrangler deploy`.
+8. Set the PWA push API base URL in the configuration expected by `pwa/app.js`. / Defina a URL base da API Push da PWA conforme esperado em `pwa/app.js`.
+9. Configure the GitHub Actions variables/secrets referenced by `.github/workflows/central-monitor.yml` and the Worker. / Configure as variáveis/secrets do GitHub Actions referenciados por `.github/workflows/central-monitor.yml` e pelo Worker.
+10. Publish the updated files, open the PWA on the device, and enable notifications in its settings. / Publique os arquivos atualizados, abra a PWA no dispositivo e ative as notificações nas configurações.
 
-- O GitHub continua sendo a fonte dos dados; a Cloudflare é somente o serviço de entrega Push.
-- O Push funciona com a PWA fechada porque o navegador/sistema operacional acorda o Service Worker para processar o evento. A entrega pode sofrer atrasos por economia de bateria, conectividade ou políticas do sistema.
-- No iPhone, Web Push para sites é suportado para web apps adicionados à Tela de Início em iOS/iPadOS 16.4 ou posterior.
-- Não coloque a chave VAPID privada, o segredo de despacho ou URLs privadas de webhook nos arquivos públicos do repositório.
+The first dispatch should establish a silent baseline. Later runs should send only new events and avoid duplicate IDs, according to the Worker and workflow implementation.
+
+O primeiro dispatch deve estabelecer uma linha de base silenciosa. As execuções seguintes devem enviar somente eventos novos e evitar IDs duplicados, conforme a implementação do Worker e do workflow.
+
+## Test | Teste
+
+Use the Worker health endpoint and the PWA's test notification control after deployment. Test with the PWA open, closed, and with the screen locked. Delivery depends on internet access, notification permission, browser support, and operating-system background policies.
+
+Após a publicação, use o endpoint de saúde do Worker e o controle de notificação de teste da PWA. Teste com a PWA aberta, fechada e com a tela bloqueada. A entrega depende de internet, permissão de notificações, suporte do navegador e políticas de execução em segundo plano do sistema.
+
+## Security | Segurança
+
+Never commit private VAPID keys, dispatch secrets, GitHub tokens, or private webhook URLs.
+
+Nunca envie ao repositório chaves VAPID privadas, segredos de despacho, tokens do GitHub ou URLs privadas de webhook.
+
+**Version / Versão: 1.0.0**

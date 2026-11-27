@@ -1,0 +1,27 @@
+# Automation notes | Notas de automação — GTA Notifier 1.0.0
+
+## Important | Importante
+
+This document describes an optional Cloudflare-to-GitHub Actions trigger. Apply it only if the corresponding Cron Trigger and token-based workflow dispatch are part of the deployment you intend to use. Do not replace existing secrets or KV bindings without checking the live Worker configuration first.
+
+Este documento descreve um disparo opcional da Cloudflare para o GitHub Actions. Aplique-o somente se o Cron Trigger correspondente e o disparo do workflow por token fizerem parte da publicação desejada. Não substitua secrets existentes nem vínculos KV sem conferir primeiro a configuração ativa do Worker.
+
+## GitHub token | Token do GitHub
+
+Create a fine-grained personal access token restricted to the `GTA-6-Notifier` repository, with only the Actions permission required to dispatch the workflow. Store it as a Cloudflare Worker secret named `GITHUB_ACTIONS_TOKEN`. Never paste the token into chat, source code, or committed files.
+
+Crie um token de acesso pessoal fine-grained restrito ao repositório `GTA-6-Notifier`, com somente a permissão Actions necessária para disparar o workflow. Armazene-o como secret do Cloudflare Worker chamado `GITHUB_ACTIONS_TOKEN`. Nunca cole o token no chat, no código-fonte ou em arquivos versionados.
+
+## Deploy and validate | Publicar e validar
+
+Use the existing deployment instructions for `cloudflare/push-worker`. After deployment, verify the configured Cron Trigger and inspect the GitHub Actions run history to confirm successful workflow dispatch and monitor completion.
+
+Use as instruções de publicação existentes de `cloudflare/push-worker`. Depois da publicação, verifique o Cron Trigger configurado e confira o histórico de execuções do GitHub Actions para confirmar o disparo do workflow e a conclusão bem-sucedida do monitor.
+
+## Preserve existing infrastructure | Preserve a infraestrutura existente
+
+Do not rotate or replace VAPID keys, `DISPATCH_SECRET`, or the existing KV namespace unless intentionally performing a coordinated migration. Keep all credentials in secret storage.
+
+Não altere nem substitua as chaves VAPID, `DISPATCH_SECRET` ou o namespace KV existente, a menos que esteja realizando intencionalmente uma migração coordenada. Mantenha todas as credenciais em armazenamento de secrets.
+
+**Version / Versão: 1.0.0**
