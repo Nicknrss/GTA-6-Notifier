@@ -1,19 +1,21 @@
 # GTA 6 Notifier — PWA companion
 
-This folder contains an installable, offline-capable PWA shell for the mobile companion.
+The PWA now reads the central JSON files published by this repository:
 
-## Important: cloud backend is required
+- `data/history.json`
+- `data/github-releases.json`
+- `data/portwatch-progress.json`
+- `data/portwatch-leaderboard.json`
 
-The browser extension stores monitoring state locally. A PWA on a phone cannot directly read the extension's storage, and browser CORS rules prevent the PWA from simply reusing the extension's privileged GitHub requests. Reliable push while the PWA is closed also requires a push server and VAPID credentials.
+It synchronizes immediately when opened and polls every 60 seconds while the page remains open. Device-local browser notifications can be enabled from the PWA.
 
-For that reason, this PWA expects a separately deployed HTTPS API. The UI supports:
+## Important limitations
 
-- `GET /api/state` — returns `{ "releasesDetected": 0, "portwatch": { "leaderScore": 0, "leaderName": "" }, "events": [{ "title": "", "message": "", "url": "", "timestamp": 0 }] }`.
-- `POST /api/push/subscribe` — accepts a standard Web Push `PushSubscription` JSON body and stores it for future notifications.
-- Web Push messages should be JSON `{ "title": "...", "body": "...", "url": "https://..." }`.
+- GitHub Pages/static JSON is not a push server. Notifications are checked while the PWA page is open; delivery while the PWA is closed is **not** guaranteed.
+- True Web Push while closed still requires a separately hosted HTTPS push endpoint and VAPID keys.
+- GitHub Actions updates the central JSON files on a five-minute schedule, subject to GitHub Actions scheduling delays.
+- The PWA reads the public repository data. Do not put secrets, webhook URLs, tokens, or private information in `data/`.
 
-The PWA can be hosted on GitHub Pages or another HTTPS static host after the API endpoint and VAPID public key are configured in the app. No cloud API is included or deployed in this package, so cross-device sync and background push are not active yet. The extension's local monitoring, dashboard, history, charts, diagnostics and notification settings work independently.
+## Hosting
 
-## Local preview
-
-Serve this folder over localhost (not `file://`) to test service-worker registration and installation. Push requires HTTPS (localhost is treated as secure by modern browsers).
+Enable GitHub Pages for the repository and publish the `main` branch root (or configure the existing Pages setup to publish `pwa/`). Open the PWA's published URL over HTTPS to install it.
