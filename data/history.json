@@ -1,5 +1,26 @@
 {
   "schemaVersion": 1,
-  "lastUpdated": "2026-11-27T11:17:48Z",
-  "events": []
+  "lastUpdated": "2026-11-27T21:08:34Z",
+  "events": [
+    {
+      "id": "f453760905d3a140262f57cc",
+      "timestamp": "2026-11-27T21:08:34Z",
+      "source": "portwatch",
+      "category": "portRanking",
+      "title": "Atualização do ranking PortWatch VI",
+      "message": "Novo líder: VIctory-NVIDIA (antes: Belobug)\nEntrou no ranking: VIctory-NVIDIA (90.0%)\nDexNom: posição 7 → 6\nsuri: posição 8 → 7\nKelvaroq: posição 9 → 8\nhyphennn: posição 10 → 9\nUilian: posição 11 → 10\nVIctory: posição 12 → 11\nXCL: posição 13 → 12\nSaiu do ranking: Belobug\nSaiu do ranking: AvatarManz",
+      "url": "https://portwatch-vi.xyz/",
+      "externalId": "6590bb08d55f6adbcdcc9c19ba4d5b89bef9caea50fe01228cef470403b09e3a"
+    },
+    {
+      "id": "e0ba1a5116b246b978e6fb1f",
+      "timestamp": "2026-11-27T21:08:34Z",
+      "source": "portwatch",
+      "category": "portGeneral",
+      "title": "Novo progresso PortWatch VI",
+      "message": "Último registro (VIctory-NVIDIA): 91.3% → 90.0%",
+      "url": "https://portwatch-vi.xyz/",
+      "externalId": "latest-portwatch:91.3:90.0:VIctory-NVIDIA"
+    }
+  ]
 }
