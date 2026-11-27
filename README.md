@@ -63,29 +63,23 @@ A pasta `pwa/` contém uma PWA instalável e com shell offline. Ela está prepar
 
 The repository's central monitor runs through GitHub Actions every five minutes
 (`.github/workflows/central-monitor.yml`). It polls the eight configured public
-GitHub Release Atom feeds and the PortWatch VI tracker, then writes the four JSON
-datasets under `data/`. **The central workflow never sends Discord messages and
-never needs a Discord webhook secret.**
+GitHub Release Atom feeds and the PortWatch VI tracker, writes the four JSON
+datasets under `data/`, and sends event notifications to Discord when the
+`DISCORD_WEBHOOK_URL` repository secret is configured.
 
-### Configure your own Discord channel
+### Configure Discord
 
-Each person configures their own destination inside their own extension. Do not
-put a personal webhook in GitHub Secrets, source files, JSON datasets, or commits.
+1. Open **Settings → Secrets and variables → Actions** in this GitHub repository.
+2. Create a repository secret named `DISCORD_WEBHOOK_URL`.
+3. Paste the Discord channel webhook URL as its value.
+4. Run **Actions → GTA 6 Notifier — Central Monitor → Run workflow** once to establish
+   the initial silent baseline and verify the pipeline.
 
-1. In Discord, open the server and the channel where you want GTA 6 Notifier alerts.
-2. Open **Edit Channel** (gear icon) → **Integrations** → **Webhooks**.
-3. Create a new webhook (or select an existing one), give it a recognizable name,
-   and choose the intended channel.
-4. Copy the webhook URL.
-5. Open GTA 6 Notifier → **Discord** settings, paste the URL, enable Discord alerts,
-   and save. Use **Test Discord** to verify delivery.
-
-The webhook is saved only in that browser profile's extension local storage. It
-is not uploaded to the central GitHub repository or shared with other users.
-If you remove the URL and save, that browser will stop sending Discord alerts.
-The extension continues its one-minute local monitoring independently of the
-five-minute GitHub central data workflow. The dashboard can read central data
-with local extension data as a fallback. The PWA reads the four public JSON files.
+The extension keeps its existing one-minute polling and local Windows/browser
+notifications. Its full dashboard now reads central history, release totals,
+PortWatch ranking and progress history from the four published JSON files, with
+local data retained as a fallback if GitHub data cannot be reached. The PWA
+continues syncing those same JSON files every minute while open.
 
 Note: the current PortWatch progress series is the score of the current ranking
 leader, matching the extension's existing score model. It is not a separate

@@ -1,6 +1,6 @@
 # GTA 6 Notifier 3.0 — pacote de integração central
 
-Este pacote adiciona monitoramento central pelo GitHub Actions, histórico público consolidado e leitura do histórico pela PWA. O envio ao Discord é individual, configurado em cada instalação da extensão.
+Este pacote adiciona monitoramento central pelo GitHub Actions, histórico público consolidado, envio de eventos ao Discord e leitura do histórico pela PWA.
 
 ## Arquivos deste pacote
 
@@ -20,21 +20,15 @@ Copie os arquivos preservando exatamente estes caminhos:
 
 Os quatro arquivos JSON já existentes em `data/` serão atualizados automaticamente pelo monitor. Não os apague.
 
-## Configuração individual do Discord (cada usuário)
+## Configuração obrigatória do Discord
 
-O backend central **não envia mensagens ao Discord** e não usa segredo `DISCORD_WEBHOOK_URL` no GitHub.
+No GitHub:
+Settings → Secrets and variables → Actions → New repository secret
 
-Cada pessoa deve criar/configurar o webhook no canal de destino:
+Nome: `DISCORD_WEBHOOK_URL`
+Valor: URL completa do webhook do canal Discord.
 
-1. Abra o servidor Discord e entre no canal desejado.
-2. Clique em **Editar canal** (engrenagem) → **Integrações** → **Webhooks**.
-3. Crie um webhook, confirme o canal de destino e copie a URL.
-4. Na extensão GTA 6 Notifier, abra as configurações de Discord, cole a URL,
-   ative os alertas e salve.
-5. Clique em **Testar Discord** para confirmar o envio.
-
-A URL fica somente no armazenamento local da extensão naquele navegador/perfil.
-Nunca envie essa URL ao repositório, ao GitHub Actions ou a outras pessoas.
+O webhook não deve ser colocado em arquivos do repositório.
 
 ## Ativar o monitor
 
@@ -52,7 +46,7 @@ Nunca envie essa URL ao repositório, ao GitHub Actions ou a outras pessoas.
 - Ranking: detecta alteração de pontuação, entrada/saída, posição e liderança.
 - Progresso geral: pontuação do líder atual, mantendo a regra já usada no código da extensão.
 - Histórico: IDs estáveis evitam duplicação em novas tentativas; `history.json` não é truncado em 300 eventos.
-- Discord: a extensão de cada usuário envia eventos ao webhook configurado localmente por ele. O monitor central não envia mensagens ao Discord.
+- Discord: envia cada evento novo das categorias Releases, ranking e progresso geral.
 - PWA: sincroniza o histórico central e faz polling enquanto estiver aberta.
 
 ## O que continua exigindo serviço externo
