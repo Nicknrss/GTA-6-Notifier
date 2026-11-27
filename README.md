@@ -52,6 +52,40 @@ flowchart TD
     I --> J["PWA"]
 ```
 
+## 📦 Updates & Availability
+
+GTA 6 Notifier is currently available in two formats:
+
+| Platform | Availability | Status |
+|---|---|---|
+| 🌐 Browser Extension | Chrome, Brave and Firefox | ✅ Available |
+| 🖥️ Desktop App | Windows (.exe) | ✅ Available |
+| 📱 Mobile App / PWA | Android and iOS | 🚧 Planned |
+
+### 🔄 What's coming next?
+
+A mobile-friendly PWA is planned for a future update. It is not available yet.
+
+Stay tuned for future announcements and improvements!
+
+---
+
+## 📦 Atualizações e Disponibilidade
+
+Atualmente, o GTA 6 Notifier está disponível em dois formatos:
+
+| Plataforma | Disponibilidade | Status |
+|---|---|---|
+| 🌐 Extensão para navegadores | Chrome, Brave e Firefox | ✅ Disponível |
+| 🖥️ Aplicativo Desktop | Windows (.exe) | ✅ Disponível |
+| 📱 Aplicativo Mobile / PWA | Android e iOS | 🚧 Planejado |
+
+### 🔄 O que vem por aí?
+
+Uma versão PWA adaptada para dispositivos móveis está planejada para uma atualização futura. Ela ainda não está disponível.
+
+Fique atento às próximas novidades e melhorias!
+
 ## 🌐 Supported browsers
 
 - Google Chrome
