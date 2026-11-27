@@ -1,0 +1,97 @@
+{
+  "schemaVersion": 1,
+  "lastUpdated": null,
+  "currentProgress": 91.3,
+  "highestRecorded": 91.3,
+  "history": [
+    {
+      "timestamp": null,
+      "label": "AvatarManz",
+      "value": 81.8,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 1
+    },
+    {
+      "timestamp": null,
+      "label": "Doomsday",
+      "value": 82.1,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 2
+    },
+    {
+      "timestamp": null,
+      "label": "DarkWorldHM",
+      "value": 84.8,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 3
+    },
+    {
+      "timestamp": null,
+      "label": "NotchNose",
+      "value": 87.1,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 4
+    },
+    {
+      "timestamp": null,
+      "label": "CGBJ",
+      "value": 89.6,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 5
+    },
+    {
+      "timestamp": null,
+      "label": "BelloBug",
+      "value": 91.3,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 6
+    }
+  ],
+  "latestCheckpoint": "BelloBug",
+  "calculation": "Última pontuação registrada no ranking PortWatch; não é média.",
+  "chartHistory": [
+    {
+      "timestamp": null,
+      "label": "AvatarManz",
+      "value": 81.8,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 1
+    },
+    {
+      "timestamp": null,
+      "label": "Doomsday",
+      "value": 82.1,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 2
+    },
+    {
+      "timestamp": null,
+      "label": "DarkWorldHM",
+      "value": 84.8,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 3
+    },
+    {
+      "timestamp": null,
+      "label": "NotchNose",
+      "value": 87.1,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 4
+    },
+    {
+      "timestamp": null,
+      "label": "CGBJ",
+      "value": 89.6,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 5
+    },
+    {
+      "timestamp": null,
+      "label": "BelloBug",
+      "value": 91.3,
+      "method": "user-provided-historical-checkpoint",
+      "sequence": 6
+    }
+  ],
+  "chartHistoryDescription": "Marcos históricos fornecidos pelo usuário; não misturar com média nem com medições dinâmicas do ranking."
+}
