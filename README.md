@@ -114,6 +114,6 @@ A PWA pode ler os conjuntos de dados públicos do repositório sem backend separ
 Created and maintained by **Nicknrss**.  
 Criado e mantido por **Nicknrss**.
 
-Repository: https://github.com/Nicknrss/GTA-6-Notifier
+Repository: https://github.com/Nicknrss/
 
 **GTA Notifier 1.0.0**
