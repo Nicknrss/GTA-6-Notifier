@@ -1,0 +1,45 @@
+CORREÇÃO DO AGENDAMENTO AUTOMÁTICO — GTA 6 NOTIFIER
+
+O que muda
+- Cloudflare Worker passa a ter um Cron Trigger */5 * * * *.
+- A cada cinco minutos, o Worker chama a API do GitHub para iniciar central-monitor.yml na branch main via workflow_dispatch.
+- O cron do GitHub fica apenas como redundância, em horários menos disputados.
+- O timeout do monitor sobe de 4 para 10 minutos para acomodar consultas sequenciais.
+
+ARQUIVOS
+1) cloudflare/push-worker/src/index.js
+2) cloudflare/push-worker/wrangler.toml
+3) .github/workflows/central-monitor.yml
+
+PASSO A — criar token no GitHub
+1. GitHub > Settings da conta > Developer settings > Personal access tokens > Fine-grained tokens.
+2. Generate new token.
+3. Resource owner: Nicknrss.
+4. Repository access: Only select repositories > GTA-6-Notifier.
+5. Repository permissions: Actions = Read and write.
+6. Gere o token e copie-o. Ele é segredo: não o envie no chat nem coloque em arquivo do repositório.
+
+PASSO B — guardar o token no Cloudflare Worker
+No terminal, entre em GTA-6-Notifier/cloudflare/push-worker e execute:
+  npx wrangler secret put GITHUB_ACTIONS_TOKEN
+Cole o token quando o terminal solicitar. Ele não deve aparecer no código nem no GitHub.
+
+PASSO C — substituir os arquivos
+No repositório GitHub, substitua os três arquivos pelos arquivos deste pacote, preservando exatamente os caminhos.
+Faça commit na branch main.
+
+PASSO D — publicar o Worker
+No terminal, ainda em cloudflare/push-worker, execute:
+  npm install
+  npx wrangler deploy
+
+PASSO E — validar
+1. Cloudflare > Workers & Pages > gta6-notifier-push > Triggers: confirme o Cron Trigger */5 * * * *.
+2. Aguarde até 6–8 minutos.
+3. GitHub > Actions > GTA 6 Notifier — Central Monitor: deve surgir uma execução disparada por workflow_dispatch a cada cinco minutos.
+4. Abra a execução e confirme que o job monitor terminou com sucesso e os JSON receberam lastUpdated novo.
+
+IMPORTANTE
+- Não compartilhe o token gerado.
+- Não altere VAPID_PUBLIC_KEY, VAPID_PRIVATE_KEY, DISPATCH_SECRET nem o KV existente.
+- O cron de backup do GitHub é best-effort; o disparo principal passa a ser o Cron Trigger do Cloudflare.
