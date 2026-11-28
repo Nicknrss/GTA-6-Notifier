@@ -15,7 +15,47 @@ ROOT=Path(__file__).resolve().parents[1]
 DATA=ROOT/'data'
 TRACKER='https://portwatch-vi.xyz/data/tracker.json'
 UA='GTA-6-Notifier-History-Importer/2.0 (+https://github.com/Nicknrss/GTA-6-Notifier)'
-DEFAULT_REPOS=['xcl-dev/xcl','Marvisak/VIctory','uiliannn/VItoriaBr','fxceless/victory-fork','stellarr-studio/kelvaroq','DexNom/VIctory','avatarmanz/VIctory-7900XTX','Belobug/VIctory-Belobug-AMD']
+DEFAULT_REPOS=[
+    'anrq0/SeriesX-Emulator',
+    'avatarmanz/VIctory-7900XTX',
+    'Belobug/VIctory-Belobug-AMD',
+    'brcly/TuxBox',
+    'californiaAlmonds/OpenScarlett',
+    'Dark3581/AnyBox',
+    'DexNom/VIctory',
+    'edupode/anyxboxseries',
+    'ethan00013/keylime',
+    'Freminet/ScarlettX',
+    'fxceless/victory-fork',
+    'Hylanderry/DedSec',
+    'ItsNotRexed/Leonida',
+    'jadeowaowa/scarlett-layer',
+    'JamesCicada/GTAVI-Recomp',
+    'JPTuba9/xlaunch-vi',
+    'Kajcsi/G6Recomp',
+    'ljm-233/Xbgtasix',
+    'LooperSalty/AnyXboxX',
+    'luizwidmer/palmetto',
+    'Marvisak/VIctory',
+    'omonkeyz/xbox-emulator',
+    'OnlyMoisties/GTA6-BootTest',
+    'OpenCommunityEdition/OpenScarlett',
+    'p-portela/SCARAB',
+    'ProhorovIlja/NativeX-Runtime',
+    'R0Y00/Xbox2Windows',
+    'realdody/americas-recomp',
+    'rpatty-dev/PercyScarlett',
+    'sammwyy/xvalkyrie',
+    'SSTGxf/ScarlettCompat',
+    'Steinkoloss/port-of-the-americas',
+    'stellarr-studio/kelvaroq',
+    'ThatRecompDev/five-star-recomp',
+    'trustno1-coder/VIctory-NVIDIA',
+    'uiliannn/VItoriaBr',
+    'xcl-dev/xcl',
+    'Zettrox/ztrx',
+    'zohaiblazuli/GrandTheftXbox',
+]
 
 def now(): return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace('+00:00','Z')
 def read_json(name, default):
