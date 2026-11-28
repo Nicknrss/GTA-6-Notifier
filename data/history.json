@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "lastUpdated": "2026-11-28T02:11:48Z",
+  "lastUpdated": "2026-11-28T03:22:38Z",
   "events": [
     {
       "id": "f453760905d3a140262f57cc",
@@ -661,6 +661,16 @@
       "message": "VIctory on NVIDIA 2026-11-26: one exe — trustno1-coder/VIctory-NVIDIA",
       "url": "https://github.com/trustno1-coder/VIctory-NVIDIA/releases/tag/v2026.11.26",
       "externalId": "tag:github.com,2008:Repository/1472451283/v2026.11.26"
+    },
+    {
+      "id": "1954ecdb52389b7cb19cffc1",
+      "timestamp": "2026-11-28T03:22:38Z",
+      "source": "github",
+      "category": "githubRelease",
+      "title": "Novo Release: trustno1-coder/VIctory-NVIDIA",
+      "message": "v2026.11.27.10 — trustno1-coder/VIctory-NVIDIA",
+      "url": "https://github.com/trustno1-coder/VIctory-NVIDIA/releases/tag/v2026.11.27.10",
+      "externalId": "tag:github.com,2008:Repository/1472451283/v2026.11.27.10"
     }
   ]
 }
