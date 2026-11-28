@@ -1,0 +1,53 @@
+{
+  "name": "gta-6-notifier-desktop",
+  "version": "3.1.5",
+  "description": "GTA 6 Notifier Desktop 3.1.4 — monitoramento em segundo plano e descoberta dinâmica",
+  "main": "main.js",
+  "author": "GTA-6-Notifier",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder --win nsis",
+    "repair": "powershell -NoProfile -ExecutionPolicy Bypass -File ./instalar-dependencias.ps1",
+    "verify-electron": "node ./bootstrap-electron.js --verify-only",
+    "prestart": "node ./bootstrap-electron.js",
+    "pre-dist": "node ./bootstrap-electron.js",
+    "audit": "npm audit --audit-level=low"
+  },
+  "devDependencies": {
+    "electron": "^35.1.5",
+    "electron-builder": "^26.0.12"
+  },
+  "build": {
+    "appId": "com.gta6notifier.desktop",
+    "productName": "GTA 6 Notifier",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "**/*",
+      "!release/**",
+      "!node_modules/.cache/**"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icon-256.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}

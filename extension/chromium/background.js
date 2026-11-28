@@ -1,5 +1,5 @@
-/* GTA 6 Notifier 2.2.0
- * GitHub Releases via public Atom feeds (no GitHub REST API).
+/* GTA 6 Notifier 2.2.1
+ * GitHub Releases via public per-repository Atom feeds (latest feed entry only).
  * PortWatch VI via public tracker JSON + news Atom feed.
  */
 try { importScripts('locale.js'); } catch (e) { console.warn('Localization load:', e); }
@@ -76,35 +76,90 @@ async function recordProgress(value,name){
  if(!last||last.value!==v)rows.push({timestamp:Date.now(),value:v,name:name||''});
  await api.storage.local.set({progressHistory:rows.slice(-240)});
 }
-// GitHub Releases monitor: public Atom feeds only (no REST API quota).
-// The first successful read establishes a silent baseline for each repository.
+// Discover projects from the live PortWatch tracker. Projects without a verified
+// GitHub repository are retained in pendingProjects instead of breaking polling.
+function githubRepoFromEffort(e){
+ const candidates=[e.github,e.githubUrl,e.github_url,e.repositoryUrl,e.repository_url,e.repoUrl,e.repo_url,e.repository,e.repo];
+ for(const raw of candidates){
+  if(!raw)continue;
+  if(typeof raw==='object'){
+   const owner=raw.owner?.login||raw.owner?.name||raw.owner||raw.organization;
+   const repo=raw.name||raw.repo;
+   if(typeof owner==='string'&&typeof repo==='string')return {owner,repo};
+   continue;
+  }
+  const value=String(raw).trim();
+  const m=value.match(/(?:github\.com[/:])([^/\s]+)\/([^/\s#?]+)|^([^/\s]+)\/([^/\s]+)$/i);
+  if(m)return {owner:m[1]||m[3],repo:(m[2]||m[4]).replace(/\.git$/i,'')};
+ }
+ const owner=e.githubOwner||e.github_owner||e.owner;
+ const repo=e.githubRepo||e.github_repo;
+ if(typeof owner==='string'&&typeof repo==='string')return {owner,repo};
+ return null;
+}
+async function discoverProjects(){
+ const response=await getJson(PORTWATCH.tracker);
+ const data=response.data||{};
+ const efforts=[...(Array.isArray(data.efforts)?data.efforts:[]),...(Array.isArray(data.candidates)?data.candidates:[])];
+ const discovered=[],pending=[],seen=new Set();
+ for(const effort of efforts){
+  if(!effort||effort.nuked)continue;
+  const name=effortName(effort);
+  const id=String(effort.id||effort.slug||effort.repo||effort.repository||name);
+  const gh=githubRepoFromEffort(effort);
+  if(gh){
+   const owner=String(gh.owner||'').trim(),repo=String(gh.repo||'').trim();
+   if(!owner||!repo)continue;
+   const key=K(owner,repo).toLowerCase();
+   if(seen.has(key))continue;seen.add(key);
+   discovered.push({owner,repo,name,developer:owner,source:'portwatch',portwatchId:id});
+  }else pending.push({id,name,status:'github-pending',portwatchId:id,portwatchUrl:effort.url||effort.link||PORTWATCH.home});
+ }
+ await api.storage.local.set({pendingProjects:pending,discoveredProjects:discovered.map(r=>({owner:r.owner,repo:r.repo,name:r.name,portwatchId:r.portwatchId,status:'identified'})),projectDiscoveryLastCheck:Date.now(),projectDiscoveryError:null});
+ return discovered;
+}
+
+// GitHub Releases monitor: use each repository's public Atom feed.
+// The feed is polled without the REST API; only its newest entry is compared.
 async function monitorGithub(storage){
- const out={events:0,errors:[],successes:0,repoHealth:{}};
+ let discovered=[];
+ const discoveryErrors=[];
+ try{discovered=await discoverProjects();}catch(e){discoveryErrors.push(`Project discovery: ${e.message||String(e)}`);await api.storage.local.set({projectDiscoveryError:e.message||String(e),projectDiscoveryLastCheck:Date.now()});}
+ const repos=[...new Map([...REPOS,...discovered].map(r=>[K(r.owner,r.repo).toLowerCase(),r])).values()];
+ const out={events:0,errors:discoveryErrors,successes:0,repoHealth:{}};
  const state={...(storage.githubReleaseState||{})};
- await Promise.all(REPOS.map(async repo=>{
+ // One repository per alarm tick keeps requests staggered across the monitored list.
+ const cursor=Number(storage.githubRepoCursor)||0;
+ const selected=repos.length?[repos[cursor%repos.length]]:[];
+ await Promise.all(selected.map(async repo=>{
   const key=K(repo.owner,repo.repo);
-  const url=`https://github.com/${repo.owner}/${repo.repo}/releases.atom`;
+  const repoUrl=`https://github.com/${repo.owner}/${repo.repo}`;
+  const releasesUrl=`${repoUrl}/releases`;
+  const feedUrl=`${repoUrl}/releases.atom`;
   try{
-   const result=await getText(url);
-   const entries=parseAtom(result.text);
-   out.successes++;out.repoHealth[key]={ok:true,lastSuccess:Date.now(),entries:entries.length,lastRelease:entries[0]?{title:entries[0].title,published:entries[0].published,link:entries[0].link}:null,error:null};
-   const known=new Set(state[key]?.ids||[]);
-   if(!state[key]?.baseline){
-    state[key]={baseline:true,etag:result.etag,ids:entries.map(e=>e.id).filter(Boolean).slice(0,30)};
+   const response=await fetch(feedUrl,{method:'GET',headers:{'Accept':'application/atom+xml, application/xml, text/xml, */*'},credentials:'omit',redirect:'follow',cache:'no-store'});
+   if(response.status===404){
+    out.repoHealth[key]={ok:false,status:'unavailable',entries:0,lastError:Date.now(),error:'HTTP 404 — repositório não encontrado, privado ou inacessível',repoUrl,releasesUrl};
     return;
    }
-   const fresh=entries.filter(e=>e.id&&!known.has(e.id));
-   // Process oldest first so Discord/system notifications preserve release order.
-   for(const entry of fresh.reverse()){
-    const title=t('newRelease',{name:repo.name});
-    const detail=entry.title||t('newReleaseDetail',{title:'New Release',repo:`${repo.owner}/${repo.repo}`});
-    await notify(title,t('newReleaseDetail',{title:detail,repo:`${repo.owner}/${repo.repo}`}),entry.link||url,'github','githubRelease');
+   if(!response.ok)throw new Error(`Feed Atom HTTP ${response.status}`);
+   const xml=await response.text();
+   if(!/<feed(?:\s|>)/i.test(xml))throw new Error('Resposta do feed Atom inválida');
+   const entries=parseAtom(xml);
+   const latest=entries[0]||null;
+   out.successes++;
+   out.repoHealth[key]={ok:true,status:latest?'releases-found':'no-releases',lastSuccess:Date.now(),entries:entries.length,lastRelease:latest?{title:latest.title,published:latest.published||latest.updated,link:latest.link}:null,error:null,repoUrl,releasesUrl};
+   const known=new Set(state[key]?.ids||[]);
+   if(!state[key]?.baseline){state[key]={baseline:true,ids:latest?.id?[latest.id]:[]};return;}
+   if(latest?.id&&!known.has(latest.id)){
+    await notify(t('newRelease',{name:repo.name}),t('newReleaseDetail',{title:latest.title,repo:key}),latest.link,'github','githubRelease');
     out.events++;
    }
-   state[key]={baseline:true,etag:result.etag,ids:[...entries.map(e=>e.id).filter(Boolean),...(state[key]?.ids||[])].filter((v,i,a)=>a.indexOf(v)===i).slice(0,50)};
-  }catch(e){out.errors.push(`${key}: ${e.message||String(e)}`);out.repoHealth[key]={ok:false,lastError:Date.now(),error:e.message||String(e)};}
+   state[key]={baseline:true,ids:[...(latest?.id?[latest.id]:[]),...(state[key]?.ids||[])].filter((v,i,a)=>a.indexOf(v)===i).slice(0,10)};
+  }catch(e){out.errors.push(`${key}: ${e.message||String(e)}`);out.repoHealth[key]={ok:false,status:'error',lastError:Date.now(),error:e.message||String(e),repoUrl,releasesUrl};}
  }));
- await api.storage.local.set({githubReleaseState:state});
+ const allRepoNames=[...new Set([...REPOS,...discovered].map(r=>K(r.owner,r.repo)))];
+ await api.storage.local.set({githubReleaseState:state,githubRepoCursor:repos.length?(cursor+1)%repos.length:0,discoveredRepoCount:discovered.length,monitoredRepoCount:allRepoNames.length,monitoredRepositories:allRepoNames});
  return out;
 }
 
@@ -209,17 +264,24 @@ async function monitorPortwatch(s){
  }catch(e){out.errors.push(`PortWatch ranking: ${e.message}`);}
  return out;
 }
-let running=false;
-async function poll(){
- if(running)return;running=true;
+let running=false,rerunRequested=false;
+async function poll(force=false){
+ if(running){if(force)rerunRequested=true;while(running)await new Promise(resolve=>setTimeout(resolve,50));return;}
+ running=true;
  try{
-  const s=await api.storage.local.get(null);if(s.enabled===false)return;
+  do{
+   rerunRequested=false;
+   const s=await api.storage.local.get(null);if(s.enabled===false)break;
   let gh={events:0,errors:[],successes:0,repoHealth:{}},pw={events:0,errors:[],success:false};
   try{gh=await monitorGithub(s);}catch(e){gh.errors.push(`GitHub: ${e.message||String(e)}`);}
   try{const fresh=await api.storage.local.get(null);pw=await monitorPortwatch(fresh);}catch(e){pw.errors.push(`PortWatch: ${e.message||String(e)}`);}
   const errors=[...gh.errors,...pw.errors];
   const oldHealth=(await api.storage.local.get('sourceHealth')).sourceHealth||{};
-  await api.storage.local.set({lastCheck:Date.now(),lastError:errors.length?errors.join(' | '):null,lastCheckedCount:REPOS.length,lastGithubEvents:gh.events,lastPortwatchEvents:pw.events,lastEventCount:gh.events+pw.events,repoHealth:{...(oldHealth.repos||{}),...gh.repoHealth},sourceHealth:{github:{ok:gh.successes>0,total:REPOS.length,successes:gh.successes,errors:gh.errors,lastCheck:Date.now()},portwatch:{ok:pw.success,errors:pw.errors,lastCheck:Date.now()},repos:{...(oldHealth.repos||{}),...gh.repoHealth}}});
+  const mergedRepos={...(oldHealth.repos||{}),...gh.repoHealth};
+  const monitored=(await api.storage.local.get(['monitoredRepoCount'])).monitoredRepoCount||Math.max(REPOS.length,Object.keys(mergedRepos).length);
+  const checked=Object.values(mergedRepos).filter(x=>x&&(['releases-found','no-releases'].includes(x.status))).length;
+  await api.storage.local.set({lastCheck:Date.now(),lastError:errors.length?errors.join(' | '):null,lastCheckedCount:checked,monitoredRepoCount:monitored,lastGithubEvents:gh.events,lastPortwatchEvents:pw.events,lastEventCount:gh.events+pw.events,repoHealth:mergedRepos,sourceHealth:{github:{ok:checked>0,total:monitored,successes:checked,errors:gh.errors,lastCheck:Date.now()},portwatch:{ok:pw.success,errors:pw.errors,lastCheck:Date.now()},repos:mergedRepos}});
+  }while(rerunRequested);
  }finally{running=false;}
 }
 async function schedule(){
@@ -250,7 +312,8 @@ api.runtime.onStartup.addListener(async()=>{await schedule();await poll();});
 api.alarms.onAlarm.addListener(a=>{if(a.name===ALARM)poll();});
 api.storage.onChanged.addListener((c,area)=>{if(area==='local'&&c.interval)schedule();});
 api.runtime.onMessage.addListener((m,s,reply)=>{
- if(m?.type==='CHECK_NOW'){poll().then(()=>api.storage.local.get(['lastCheck','lastError','lastEventCount','lastCheckedCount','lastGithubEvents','lastPortwatchEvents'])).then(reply).catch(e=>reply({lastError:String(e)}));return true;}
+ if(m?.type==='DOWNLOAD_UPDATE'){(async()=>{try{if(!m.url||!/^https:\/\//i.test(m.url))throw new Error('Invalid download URL');const result=await api.downloads.download({url:m.url,filename:String(m.filename||'GTA-6-Notifier-Extension-update.zip').replace(/[\\/:*?\"<>|]/g,'_'),saveAs:true,conflictAction:'uniquify'});reply({ok:true,downloadId:result});}catch(e){reply({ok:false,error:e.message||String(e)});}})();return true;}
+ if(m?.type==='CHECK_NOW'){poll(true).then(()=>api.storage.local.get(['lastCheck','lastError','lastEventCount','lastCheckedCount','lastGithubEvents','lastPortwatchEvents'])).then(reply).catch(e=>reply({lastError:String(e)}));return true;}
  if(m?.type==='TEST_DISCORD'){testDiscord().then(reply).catch(e=>reply({ok:false,error:e.message||String(e)}));return true;}
  if(m?.type==='TEST_NOTIFICATION'||m?.type==='TEST_WINDOWS'){testSystemNotification().then(reply).catch(e=>reply({ok:false,error:e.message||String(e)}));return true;}
  if(m?.type==='GET_DASHBOARD'){api.storage.local.get(null).then(reply).catch(e=>reply({error:String(e)}));return true;}

@@ -247,7 +247,15 @@ def main() -> None:
     leaderboard.setdefault("entries", [])
     leaderboard.setdefault("history", [])
 
-    known_release_ids = {r.get("id") for r in gh["releases"] if isinstance(r, dict)}
+    known_release_ids = {str(r.get("id")) for r in gh["releases"] if isinstance(r, dict) and r.get("id")}
+    # REST-imported IDs differ from Atom entry IDs. Canonical release URLs are
+    # the common key, preventing historical Releases from being re-announced.
+    def canonical_release_url(value):
+        value = str(value or "").strip().split("?", 1)[0].rstrip("/")
+        value = value.replace("http://github.com/", "https://github.com/")
+        return value.casefold()
+    known_release_urls = {canonical_release_url(r.get("url")) for r in gh["releases"]
+                          if isinstance(r, dict) and r.get("url")}
     gh_baseline = bool(gh.get("baselineComplete"))
     new_events: list[dict] = []
 
@@ -256,7 +264,9 @@ def main() -> None:
         try:
             entries = parse_atom(fetch(f"https://github.com/{repo}/releases.atom", "application/atom+xml, application/xml"), repo)
             for release in entries:
-                if release["id"] not in known_release_ids:
+                release_url = canonical_release_url(release.get("url"))
+                already_known = release["id"] in known_release_ids or (release_url and release_url in known_release_urls)
+                if not already_known:
                     if gh_baseline:
                         new_events.append(make_event(
                             "github", "githubRelease", f"Novo Release: {repo}",
@@ -264,6 +274,8 @@ def main() -> None:
                         ))
                     gh["releases"].append(release)
                     known_release_ids.add(release["id"])
+                    if release_url:
+                        known_release_urls.add(release_url)
         except Exception as exc:
             print(f"GitHub feed error [{repo}]: {exc}")
     gh["baselineComplete"] = True

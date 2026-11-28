@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#17101b"><meta name="description" content="Painel mobile completo do GTA 6 Notifier">
+  <link rel="manifest" href="manifest.webmanifest"><link rel="stylesheet" href="app.css">
+  <title>GTA 6 Notifier</title>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand"><img src="./icons/icon-128.png" alt="GN"><div><strong>GTA 6 Notifier</strong><small>Painel de monitoramento</small></div></div>
+  <div class="top-actions"><span id="connection" class="pill offline">Offline</span><button id="refresh" class="icon-btn" aria-label="Atualizar">↻</button></div>
+</header>
+<main id="main">
+  <section id="overview" class="page active">
+    <div class="hero"><div class="eyebrow">GTA VI · CENTRAL DE MONITORAMENTO</div><h1 id="heroTitle">Seu painel GTA 6 Notifier</h1><p id="heroText">GitHub Releases e progresso PortWatch em um só lugar.</p><div class="hero-meta"><span id="updatedAt">Aguardando sincronização</span><span id="refreshing">●</span></div></div>
+    <div class="stat-grid">
+      <article class="stat"><span>Fontes monitoradas</span><b>9</b><small>8 repositórios + PortWatch</small></article>
+      <article class="stat"><span>Releases detectados</span><b id="releaseCount">—</b><small>Dados centrais do GitHub</small></article>
+      <article class="stat"><span>Eventos no histórico</span><b id="eventCount">—</b><small>Histórico central</small></article>
+      <article class="stat"><span>Progresso líder</span><b id="progressValue">—</b><small id="leaderLabel">PortWatch VI</small></article>
+    </div>
+    <div class="section-title"><div><h2>Saúde das fontes</h2><p>Última atualização dos dados publicados</p></div></div>
+    <div id="healthCards" class="stack"></div>
+    <div class="section-title"><div><h2>Eventos recentes</h2><p>Últimas alterações detectadas</p></div><button class="text-link" data-go="history">Ver tudo</button></div>
+    <div id="recentEvents" class="stack"></div>
+  </section>
+
+  <section id="history" class="page">
+    <div class="page-heading"><div><span class="eyebrow">ATIVIDADE</span><h1>Histórico</h1><p>Eventos registrados pelo monitor central.</p></div><span id="historyTotal" class="count-badge">0</span></div>
+    <div class="filter-row"><input id="historySearch" type="search" placeholder="Buscar no histórico…" aria-label="Buscar no histórico"><select id="historyFilter" aria-label="Filtrar histórico"><option value="all">Todos</option><option value="githubRelease">GitHub Releases</option><option value="portRanking">Ranking PortWatch</option><option value="portProgress">Progresso PortWatch</option></select></div>
+    <div id="historyList" class="stack"></div>
+  </section>
+
+  <section id="repos" class="page">
+    <div class="page-heading"><div><span class="eyebrow">GITHUB</span><h1>Repositórios</h1><p>Os oito projetos acompanhados pelo monitor central.</p></div><span class="count-badge">8</span></div>
+    <div id="repoList" class="stack"></div>
+    <p class="footnote">O monitor central verifica novos Releases. A atualização dos dados ocorre pelo GitHub Actions.</p>
+  </section>
+
+  <section id="chart" class="page">
+    <div class="page-heading"><div><span class="eyebrow">PORTWATCH VI</span><h1>Progresso e ranking</h1><p>Pontuação individual dos participantes, sem média.</p></div></div>
+    <article class="panel-card chart-card"><div class="card-heading"><div><h2>Ranking atual</h2><small>Ordem crescente de pontuação</small></div><span id="rankingUpdated" class="muted"></span></div><div id="rankingList" class="ranking-list"></div></article>
+    <article class="panel-card"><div class="card-heading"><div><h2>Histórico de progresso</h2><small>Evolução registrada pelo PortWatch</small></div><strong id="chartCurrent">—</strong></div><div class="chart-wrap"><svg id="progressChart" viewBox="0 0 640 260" role="img" aria-label="Gráfico de evolução do progresso PortWatch"></svg><p id="chartEmpty" class="empty">Ainda não há pontos suficientes para desenhar o gráfico.</p></div><div id="chartSummary" class="muted"></div></article>
+  </section>
+
+  <section id="settings" class="page">
+    <div class="page-heading"><div><span class="eyebrow">PREFERÊNCIAS</span><h1>Configurações</h1><p>Alertas e comportamento deste dispositivo.</p></div></div>
+    <article class="panel-card"><h2>Notificações Push</h2><p class="helper">Receba alertas mesmo com o painel fechado e a tela do celular bloqueada. É necessário permitir notificações e concluir a inscrição deste aparelho.</p><div class="push-state"><span id="pushStatus" class="status-dot"></span><span id="pushStatusText">Push ainda não configurado</span></div><button id="enablePush" class="primary-btn">Ativar notificações neste celular</button><button id="testPush" class="secondary-btn" disabled>Enviar notificação de teste</button><small id="pushHelp" class="helper">O serviço de Push na Cloudflare precisa estar publicado e configurado.</small></article>
+    <article class="panel-card"><h2>Tipos de alerta</h2><label class="toggle-row"><span><b>Novos GitHub Releases</b><small>Quando um repositório publicar uma versão</small></span><input id="alertGithub" type="checkbox" checked></label><label class="toggle-row"><span><b>Mudanças no ranking</b><small>Quando a classificação PortWatch mudar</small></span><input id="alertRanking" type="checkbox" checked></label><label class="toggle-row"><span><b>Progresso geral PortWatch</b><small>Quando houver novo marco de progresso</small></span><input id="alertProgress" type="checkbox" checked></label><button id="saveAlerts" class="secondary-btn">Salvar preferências de alerta</button></article>
+    <article class="panel-card"><h2>Discord</h2><p class="helper">Webhook individual deste navegador. A URL fica armazenada apenas neste dispositivo.</p><label class="field-label">Webhook URL<input id="discordWebhook" type="password" autocomplete="off" placeholder="https://discord.com/api/webhooks/…"></label><label class="toggle-row"><span><b>Enviar alertas ao Discord</b><small>Além das notificações Push</small></span><input id="discordEnabled" type="checkbox"></label><button id="saveDiscord" class="secondary-btn">Salvar Discord</button><button id="testDiscord" class="secondary-btn">Testar Discord</button></article>
+    <article class="panel-card"><h2>Atualização</h2><p class="helper">A PWA consulta os JSONs centrais do GitHub a cada minuto enquanto está aberta. O monitor central atualiza os dados a cada cinco minutos.</p><button id="syncNow" class="secondary-btn">Sincronizar agora</button><p id="settingsFeedback" class="feedback" role="status"></p></article>
+  </section>
+
+  <section id="diagnostics" class="page">
+    <div class="page-heading"><div><span class="eyebrow">SISTEMA</span><h1>Diagnóstico</h1><p>Conectividade, dados e notificações deste dispositivo.</p></div></div>
+    <div id="diagnosticsList" class="stack"></div><button id="runDiagnostics" class="secondary-btn">Executar diagnóstico</button>
+  </section>
+</main>
+<nav class="bottom-nav" aria-label="Navegação principal">
+  <button class="nav-item active" data-page="overview"><span>⌂</span><small>Início</small></button>
+  <button class="nav-item" data-page="history"><span>◷</span><small>Histórico</small></button>
+  <button class="nav-item" data-page="repos"><span>⌘</span><small>GitHub</small></button>
+  <button class="nav-item" data-page="chart"><span>▥</span><small>PortWatch</small></button>
+  <button class="nav-item" data-page="settings"><span>⚙</span><small>Ajustes</small></button>
+</nav>
+<script src="app.js"></script>
+</body></html>
